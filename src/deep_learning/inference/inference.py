@@ -2,6 +2,7 @@
 
 import os
 import torch
+import torch.nn.functional as F
 import numpy as np
 import nibabel as nib
 from scipy.ndimage.morphology import binary_dilation
@@ -189,8 +190,9 @@ def _pred_softmax_one_model(config, data_config, model_path, input_path_dict):
             n_pred += 1
         pred /= n_pred
 
-    # Unpad the softmax prediction
-    softmax = pred[:, :, pad_values[0,0]:pred.size(2)-pad_values[0,1], pad_values[1,0]:pred.size(3)-pad_values[1,1], pad_values[2,0]:pred.size(4)-pad_values[2,1]]
+    # Unpad the score prediction
+    score = pred[:, :, pad_values[0,0]:pred.size(2)-pad_values[0,1], pad_values[1,0]:pred.size(3)-pad_values[1,1], pad_values[2,0]:pred.size(4)-pad_values[2,1]]
+    softmax = F.softmax(score, dim=1)
 
     # Insert the softmax segmentation in the original image size
     meta_data = data['%s_meta_dict' % data_config['info']['image_keys'][0]]
@@ -199,6 +201,7 @@ def _pred_softmax_one_model(config, data_config, model_path, input_path_dict):
     fg_start = data['foreground_start_coord'][0]
     fg_end = data['foreground_end_coord'][0]
     full_softmax = torch.zeros(full_dim)
+    full_softmax[:, 0, ...] = 1.  # background by default
     full_softmax[:, :, fg_start[0]:fg_end[0], fg_start[1]:fg_end[1], fg_start[2]:fg_end[2]] = softmax
 
     return full_softmax, meta_data

@@ -10,3 +10,5 @@ Those atlases were used for training and are also used for the preprocesing.
 
 
 Those two folders are not stored in the git repository.
+They can be downloaded at
+https://drive.google.com/drive/folders/1V5PBETb89GEA3oSNidTpQRtNADjcdp_0?usp=sharing

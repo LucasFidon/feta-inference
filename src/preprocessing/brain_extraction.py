@@ -82,22 +82,22 @@ def get_brain_mask(path_srr, gestational_age, dir_output, tmp_folder,
     out_proba_mask_path_list = []
 
     # We register the several templates volumes to the target SRR
+    print('Use the template volumes:')
     for ga_delta in [-1, 0, 1]:
         ga = gestational_age + ga_delta
         if ga < 21:
             continue
         if ga > 38:
             continue
-        print('Use the template volumes:')
         for condition in CONDITIONS:
             if condition != 'Neurotypical' and ga > 34:
                 continue
             template, template_mask = get_template_path(ga, condition)
-            print(os.path.dirname(template))
+            print(os.path.split(os.path.dirname(template))[1])
 
             template_warp_aff = os.path.join(
                 tmp_folder, 'template_warp_aff_GA%d_%s.nii.gz' % (ga, condition))
-            save_aff = os.path.join(tmp_folder, 'affine_init_GA%d_%s.txt' % (ga, condition))
+            save_aff = os.path.join(tmp_folder, 'affine_GA%d_%s.txt' % (ga, condition))
             cmd = 'reg_aladin '
             cmd += '-ref %s ' % path_srr
             cmd += '-fmask %s ' % template_mask
@@ -113,7 +113,7 @@ def get_brain_mask(path_srr, gestational_age, dir_output, tmp_folder,
             os.system(cmd)
 
             template_mask_warp_aff = os.path.join(
-                tmp_folder, 'template_mask_warp_aff_GA%d_%s.nii.gz' % (ga, condition))
+                tmp_folder, 'template_mask_warp_GA%d_%s.nii.gz' % (ga, condition))
             cmd = 'reg_resample '
             cmd += '-ref %s ' % path_srr
             cmd += '-flo %s ' % template_mask
@@ -158,7 +158,7 @@ def main(args):
     else:
         out_folder = args.output_folder
 
-    tmp_folder = os.path.join(out_folder, 'tmp_brain_extraction')
+    tmp_folder = os.path.join(out_folder, 'brain_extraction')
     if not os.path.exists(tmp_folder):
         os.mkdir(tmp_folder)
 
@@ -170,13 +170,14 @@ def main(args):
 
     # Estimate the brain mask for the input image in the template space
     print('\nEstimate the brain mask')
-    _ = get_brain_mask(
+    out_mask_path = get_brain_mask(
         path_srr=args.input_img,
         gestational_age=args.ga,
         dir_output=out_folder,
         path_initial_mask=thres_mask_path,
         tmp_folder=tmp_folder,
     )
+    print('Brain mask saved at %s' % out_mask_path)
 
     # if os.path.exists(tmp_folder):
     #     os.system('rm -r %s' % tmp_folder)

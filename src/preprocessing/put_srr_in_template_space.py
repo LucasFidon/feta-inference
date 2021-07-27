@@ -1,6 +1,6 @@
 """
 Use this script to pre-process external data (not reconstructed using NiftyMIC)
-This script performs rigid register of the SRR to the template space.
+This script performs rigid registration of the SRR to the template space.
 
 @author: Lucas Fidon (lucas.fidon@kcl.ac.uk)
 """

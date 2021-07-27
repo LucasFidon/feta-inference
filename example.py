@@ -11,6 +11,8 @@ import json
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '.'))
 sys.stdout.flush()
+import numpy as np
+import nibabel as nib
 from src.deep_learning.inference.inference import pred_softmax
 
 
@@ -55,6 +57,8 @@ cmd_put_in_template_space = 'python %s/src/preprocessing/put_srr_in_template_spa
 os.system(cmd_put_in_template_space)
 T2wImageTemplateSpacePath = os.path.join(outputDirTemplateSpace, 'srr.nii.gz')
 maskTemplateSpacePath = os.path.join(outputDirTemplateSpace, 'mask.nii.gz')
+affinePath = os.path.join(outputDirTemplateSpace, 'tmp_put_srr_to_template_space', 'affine.txt')
+
 
 # INFERENCE
 print('\n** Run the deep learning ensemble on the SRR in the template space')
@@ -63,19 +67,19 @@ pred_softmax(
     mask_path=maskTemplateSpacePath,
     save_folder=outputDirTemplateSpace,
 )
+softmaxTemplateSpace = os.path.join(outputDirTemplateSpace, 'srr_preprocessed', 'srr_preprocessed_softmax.nii.gz')
+
 
 # POSTPROCESSING
-#todo
-
-##
-# your logic here. Below we do binary thresholding as a demo
-##
-
-# # using SimpleITK to do binary thresholding between 100 - 10000
-# T2wImage = sitk.ReadImage(T2wImagePath)
-# resultImage = sitk.BinaryThreshold(T2wImage, lowerThreshold=100, upperThreshold=10000)
-#
-# # Save the segmentation mask
-# save_path = os.path.join(outputDir, sub + '_seg_result.nii.gz')
-# sitk.WriteImage(resultImage, save_path)
-# print('\nPredicted segmentation saved as %s' % save_path)
+print('\n** Warp the segmentation to the subject space')
+cmd_put_in_subject_space = 'python %s/src/postprocessing/put_softmax_in_subject_space.py --softmax %s --aff %s --input_img %s --output_folder %s' % \
+    (repo_dir, softmaxTemplateSpace, affinePath, T2wImagePath, outputDir)
+os.system(cmd_put_in_subject_space)
+softmaxPath = os.path.join(outputDir, 'softmax.nii.gz')
+softmax_nii = nib.load(softmaxPath)
+softmax = softmax_nii.get_fdata().astype(np.float32)
+seg = np.argmax(softmax, axis=-1).astype(np.uint8)
+seg_nii = nib.Nifti1Image(seg, softmax_nii.affine)
+save_path = os.path.join(outputDir, sub + '_seg_result.nii.gz')
+nib.save(seg_nii, save_path)
+print('\nPredicted segmentation saved at %s' % save_path)

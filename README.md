@@ -4,12 +4,18 @@ Inference pipeline for our participation in the FeTA challenge 2021.
 Team name: TRABIT
 
 ## Installation
-To build the docker image run
+
+Download the two folders in
+https://drive.google.com/drive/folders/1V5PBETb89GEA3oSNidTpQRtNADjcdp_0?usp=sharing
+
+Move them to ```feta-inference/data```
+
+Build the docker image by running
 ```bash
 cd feta-inference
 sh build_docker.sh
 ```
-The tag for the docker image should be ```feta_challenge/trabit:latest```.
+The tag for the docker image should be ```feta_challenge/trabit:latest```
 
 ## Run inference using docker
 After you have built the docker image, you can create a docker container 

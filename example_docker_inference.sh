@@ -2,10 +2,11 @@
 
 # You need to have build our docker image begore running this script
 # You also need to change the paths below
-TEST_INPUT_IMG='/home/lucasf/data/test_FeTA_inference/sub-test'  # contains /anat
-TEST_INPUT_META='/home/lucasf/data/test_FeTA_inference/sub-test/anat'
+SUB_NAME="sub-test"
+TEST_INPUT_IMG="/home/lucasf/data/test_FeTA_inference/${SUB_NAME}"  # contains /anat
+TEST_INPUT_META="/home/lucasf/data/test_FeTA_inference/${SUB_NAME}"
 TEAM_NAME=trabit  # this will also be the container name
-RESULT_LOCATION='/home/lucasf/data/test_FeTA_inference/sub-test/result'
+RESULT_LOCATION="/home/lucasf/data/test_FeTA_inference/${SUB_NAME}"
 
 # Create the docker container
 docker run -dit \
@@ -17,10 +18,6 @@ docker run -dit \
     feta_challenge/${TEAM_NAME}
 
 # Run the segmentation algorithm
-#docker exec ${TEAM_NAME} nvidia-smi
-#docker exec ${TEAM_NAME} ls /workspace
-#docker exec ${TEAM_NAME} ls /workspace/niftyreg_install/bin
-#docker exec ${TEAM_NAME} printenv PATH
 docker exec ${TEAM_NAME} python /feta_seg/example.py
 
 # Copy the result
