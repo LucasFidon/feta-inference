@@ -71,7 +71,7 @@ def create_mask_thresholding(img_path, save_mask_path, threshold=0):
 
 
 def get_brain_mask(path_srr, gestational_age, dir_output, tmp_folder,
-                   path_initial_mask=None, rig_only=False):
+                   path_initial_mask, rig_only=False):
     """
     An estimation of the brain mask is obtained by registering the templates
     into the input image, and propagating the mask of the template.
@@ -101,9 +101,8 @@ def get_brain_mask(path_srr, gestational_age, dir_output, tmp_folder,
             cmd = 'reg_aladin '
             cmd += '-ref %s ' % path_srr
             cmd += '-fmask %s ' % template_mask
-            if path_initial_mask is not None:
-                cmd += '-rmask %s ' % path_initial_mask
-                cmd += '-comm '  # use the input masks centre of mass to initialise the transformation
+            cmd += '-rmask %s ' % path_initial_mask
+            cmd += '-comm '  # use the input masks centre of mass to initialise the transformation
             if rig_only:
                 cmd += '-rigOnly'
             cmd += '-flo %s ' % template

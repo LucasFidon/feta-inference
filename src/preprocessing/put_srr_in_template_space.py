@@ -24,7 +24,7 @@ parser.add_argument('--ga', required=True, type=int, help='gestational age')
 
 
 def register_to_template_space(path_srr, gestational_age, dir_output,
-                               tmp_folder, path_mask=None):
+                               tmp_folder, path_mask):
     """
     Register the SRR in path_srr to the normal fetal brain atlas with the same GA.
     A rigid transformation is used.
@@ -40,13 +40,12 @@ def register_to_template_space(path_srr, gestational_age, dir_output,
     cmd += '-ref %s ' % template
     cmd += '-rmask %s ' % template_mask
     cmd += '-flo %s ' % path_srr
+    cmd += '-fmask %s ' % path_mask
     cmd += '-res %s ' % save_path
     cmd += '-aff %s ' % affine_path
+    cmd += '-comm '  # use the input masks centre of mass to initialise the transformation
     cmd += '-pad 0 '
-    if path_mask is not None:
-        cmd += '-fmask %s -rigOnly -voff' % path_mask
-    else:
-        cmd += '-rigOnly -noSym -voff'
+    cmd += '-rigOnly -voff'
     os.system(cmd)
     return save_path, affine_path
 
