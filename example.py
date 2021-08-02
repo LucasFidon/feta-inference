@@ -8,6 +8,7 @@ import os
 import glob
 import ast
 import json
+import time
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '.'))
 sys.stdout.flush()
@@ -15,6 +16,7 @@ import numpy as np
 import nibabel as nib
 from src.deep_learning.inference.inference import pred_softmax
 
+t0 = time.time()
 
 # Important directories
 input_img_dir = '/input_img'
@@ -45,11 +47,16 @@ print('GA used:', GA_ROUNDED)
 
 
 # PRE-PROCESSING
-print('\n** Create the brain mask (mask.nii.gz saved in outputDir)')
-cmd_brain_extraction = 'python %s/src/preprocessing/brain_extraction.py --input_img %s --output_folder %s --ga %d' % \
-    (repo_dir, T2wImagePath, outputDir, GA_ROUNDED)
-os.system(cmd_brain_extraction)
-maskPath = os.path.join(outputDir, 'mask.nii.gz')
+# Try to find an existing brain mask
+maskPath = os.path.join(input_img_dir, 'mask.nii.gz')
+if os.path.exists(maskPath):
+    print('\n** Found the brain mask %s' % maskPath)
+else:
+    print('\n** Create the brain mask (mask.nii.gz saved in outputDir)')
+    cmd_brain_extraction = 'python %s/src/preprocessing/brain_extraction.py --input_img %s --output_folder %s --ga %d' % \
+        (repo_dir, T2wImagePath, outputDir, GA_ROUNDED)
+    os.system(cmd_brain_extraction)
+    maskPath = os.path.join(outputDir, 'mask.nii.gz')
 
 print('\n** Put the SRR and mask in the template space')
 cmd_put_in_template_space = 'python %s/src/preprocessing/put_srr_in_template_space.py --input_img %s --input_mask %s --output_folder %s --ga %d' % \
@@ -83,3 +90,6 @@ seg_nii = nib.Nifti1Image(seg, softmax_nii.affine)
 save_path = os.path.join(outputDir, sub + '_seg_result.nii.gz')
 nib.save(seg_nii, save_path)
 print('\nPredicted segmentation saved at %s' % save_path)
+
+duration = int(time.time() - t0)
+print('Total time: %dmin%dsec' % (duration // 60, duration % 60))
