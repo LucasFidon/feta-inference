@@ -27,6 +27,7 @@ parser.add_argument('--output_folder',
                     help='Folder where to save the mask.nii.gz file. '
                          'By default the folder of the input image is used.')
 parser.add_argument('--ga', required=True, type=int, help='gestational age')
+parser.add_argument('--spina_bifida', action='store_true')
 
 
 def get_template_path(gestational_age, condition='Neurotypical'):
@@ -71,7 +72,7 @@ def create_mask_thresholding(img_path, save_mask_path, threshold=0):
 
 
 def get_brain_mask(path_srr, gestational_age, dir_output, tmp_folder,
-                   path_initial_mask, rig_only=False):
+                   path_initial_mask, rig_only=False, spina_bifida=False):
     """
     An estimation of the brain mask is obtained by registering the templates
     into the input image, and propagating the mask of the template.
@@ -89,7 +90,11 @@ def get_brain_mask(path_srr, gestational_age, dir_output, tmp_folder,
             continue
         if ga > 38:
             continue
-        for condition in CONDITIONS:
+        if spina_bifida:
+            condition_list = ['Pathological']
+        else:
+            condition_list = CONDITIONS
+        for condition in condition_list:
             if condition != 'Neurotypical' and ga > 34:
                 continue
             template, template_mask = get_template_path(ga, condition)
@@ -175,6 +180,7 @@ def main(args):
         dir_output=out_folder,
         path_initial_mask=thres_mask_path,
         tmp_folder=tmp_folder,
+        spina_bifida=args.spina_bifida,
     )
     print('Brain mask saved at %s' % out_mask_path)
 

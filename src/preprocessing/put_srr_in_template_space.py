@@ -21,16 +21,19 @@ parser.add_argument('--input_mask', required=True,
                     help='Path to the brain mask (usually obtained with brain_extraction.py)')
 parser.add_argument('--output_folder', required=True)
 parser.add_argument('--ga', required=True, type=int, help='gestational age')
+parser.add_argument('--spina_bifida', action='store_true')
 
 
 def register_to_template_space(path_srr, gestational_age, dir_output,
-                               tmp_folder, path_mask):
+                               tmp_folder, path_mask, spina_bifida=False):
     """
     Register the SRR in path_srr to the normal fetal brain atlas with the same GA.
     A rigid transformation is used.
     The warped SRR and the rigid transformation are saved in dir_output.
     """
-    template, template_mask = get_template_path(gestational_age)
+    condition = 'Pathological' if spina_bifida else 'Neurotypical'
+    template, template_mask = get_template_path(gestational_age, condition=condition)
+    print(template)
     save_path = os.path.join(
         dir_output,
         'srr.nii.gz'
@@ -109,6 +112,7 @@ def main(args):
         dir_output=args.output_folder,
         path_mask=mask_path,
         tmp_folder=tmp_folder,
+        spina_bifida=args.spina_bifida,
     )
 
     # Warp the mask

@@ -23,7 +23,7 @@ def _check_input_path(data_config, input_path_dict):
         assert key in list(input_path_dict.keys()), 'Input key %s not found in the input paths provided' % key
 
 
-def pred_softmax(img_path, mask_path, save_folder):
+def pred_softmax(img_path, mask_path, save_folder, convert_labels=True):
     # Load the config files
     config = load_config()
     data_config = load_feta_data_config()
@@ -51,7 +51,8 @@ def pred_softmax(img_path, mask_path, save_folder):
     mean_softmax /= len(MODELS_PATH)
 
     # Post-processing
-    mean_softmax = _postprocessing(mean_softmax=mean_softmax)
+    if convert_labels:
+        mean_softmax = _postprocessing(mean_softmax=mean_softmax)
 
     # Save the softmax segmentation
     saver = NiftiSaver(output_dir=save_folder, output_postfix="softmax")
